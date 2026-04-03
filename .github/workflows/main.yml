@@ -16,8 +16,8 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    schedule:
-      - cron: '49 9 * * *' # Minute Hour DOM Month DOW(0-7) This will run the workflow every day at 9:49AM (UTC time)
+ #   schedule:
+ #     - cron: '49 9 * * *' # Minute Hour DOM Month DOW(0-7) This will run the workflow every day at 9:49AM (UTC time)
 
 permissions: #to disallow this workflow from making any changes to the repository, we set the permissions to read-only.
   contents: read
