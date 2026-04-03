@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      -name: Code checkout
+      - name: Code checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 #this is required for the security scan to work properly, as it needs access to the full commit history
