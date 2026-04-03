@@ -56,8 +56,14 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Maven Test
+      - name: Run tests on main branch
+        if: github.ref == 'refs/heads/main' #this step will only run if the workflow is triggered by a push to the main branch
         run: mvn test
 
-      - name: Checkstyle Check
+      - name: Run Checkstyle Check on main branche
+        if: github.ref == 'refs/heads/main'
         run: mvn checkstyle:checkstyle
+
+      - name: Run tests on non-main branches
+        if: github.ref != 'refs/heads/main' #this step will only run if the workflow is triggered by a push to a non-main branch
+        run: echo "Skipping unit tests and code analysis for non-main branches."
