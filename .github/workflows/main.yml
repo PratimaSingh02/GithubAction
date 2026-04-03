@@ -17,6 +17,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions: #to disallow this workflow from making any changes to the repository, we set the permissions to read-only.
+  contents: read
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -33,6 +36,16 @@ jobs:
       # Runs a single command using the runners shell
       - name: Maven Build
         run: mvn install
+
+      - name: Archive WAR files #by default, the workspace folder gets removed after the job finishes, so we need to save the generated WAR files as artifacts if we want to use them in another job
+        uses: actions/upload-artifact@v3
+        with:
+          name: vprofile-app
+          path: target/*.war
+
+      - name: Notify if build fails
+        if: failure() #this step will only run if the previous steps fail
+        run: echo "Build failed! Please check the logs for more details."
 
   Testing:
     runs-on: ubuntu-latest
