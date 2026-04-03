@@ -67,3 +67,27 @@ jobs:
       - name: Run tests on non-main branches
         if: github.ref != 'refs/heads/main' #this step will only run if the workflow is triggered by a push to a non-main branch
         run: echo "Skipping unit tests and code analysis for non-main branches."
+
+  Security-Scan:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      -name: Code checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 #this is required for the security scan to work properly, as it needs access to the full commit history
+      
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          scan-type: 'fs' #this will scan the entire filesystem of the runner for vulnerabilities, including the code and dependencies of the project. You can also use 'image' to scan a container image or 'repository' to scan a Git repository.
+          scan-ref: . #pwd
+          format: json #this will output the scan results in JSON format, which can be easily parsed and analyzed. You can also use 'table' for a human-readable format or 'template' to customize the output using a Go template.
+          exit-code: '0' #this will prevent the action from failing the job if any vulnerabilities are found. You can set it to '1' to fail the job on any vulnerability or '2' to fail only on high severity vulnerabilities.
+          output: trivy-results.json #this will save the scan results to a file named trivy-results.json in the workspace, which can be used for further analysis or reporting. You can also use 'stdout' to print the results to the console.
+
+      - name: Upload Trivy scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-results
+          path: trivy-results.json
