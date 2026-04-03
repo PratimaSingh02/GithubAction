@@ -40,7 +40,7 @@ jobs:
         run: mvn install
 
       - name: Archive WAR files #by default, the workspace folder gets removed after the job finishes, so we need to save the generated WAR files as artifacts if we want to use them in another job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vprofile-app
           path: target/*.war
