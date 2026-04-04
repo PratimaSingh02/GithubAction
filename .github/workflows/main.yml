@@ -19,6 +19,9 @@ on:
  #   schedule:
  #     - cron: '49 9 * * *' # Minute Hour DOM Month DOW(0-7) This will run the workflow every day at 9:49AM (UTC time)
 
+env:
+  ECR_REPOSITORY: 'vprofile-appimage' #this is the name of the ECR repository where the Docker image will be pushed. You need to create this repository in your AWS account before running the workflow.
+
 permissions: #to disallow this workflow from making any changes to the repository, we set the permissions to read-only.
   contents: read
 
@@ -91,3 +94,34 @@ jobs:
         with:
           name: trivy-scan-results
           path: trivy-results.json
+
+  BUILD_AND_PUBLISH:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [build, Testing, Security-Scan] # This job will only run if the "build", "Testing", and "Security-Scan" jobs complete successfully
+    if: github.ref == 'refs/heads/main' # This job will only run if the workflow is triggered by a push to the main branch
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build, tag and push Docker image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f Docker-files/app/multistage/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . #tagging the image in the end
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
