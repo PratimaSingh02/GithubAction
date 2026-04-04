@@ -1,5 +1,5 @@
 FROM maven:3.9.9-eclipse-temurin-21-jammy AS BUILD_IMAGE
-COPY . /app # Copy the entire project to the /app directory in the container 
+COPY . /app
 WORKDIR /app
 RUN mvn install
 
