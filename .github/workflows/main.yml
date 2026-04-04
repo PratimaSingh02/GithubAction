@@ -81,7 +81,7 @@ jobs:
           fetch-depth: 0 #this is required for the security scan to work properly, as it needs access to the full commit history
       
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: 'fs' #this will scan the entire filesystem of the runner for vulnerabilities, including the code and dependencies of the project. You can also use 'image' to scan a container image or 'repository' to scan a Git repository.
           scan-ref: . #pwd
